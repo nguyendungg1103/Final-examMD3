@@ -1,5 +1,5 @@
 const http = require('http');
-const conn = require("../final-example/model/database");
+const conn = require("./models/database");
 const controllers = require('./controller/controller')
 const url = require("url");
 
@@ -13,13 +13,16 @@ conn.connect(err => {
 
 http.createServer((req, res) => {
     let parseUrl = url.parse(req.url, true);
+    console.log(parserUrl);
 
     let path = parseUrl.pathname;
     let trimPath = path.replace(/^\/+|\/+$/g, '');
 
     let chosenHandler = (typeof (router[trimPath]) !== 'undefined') ? router[trimPath] : handlers.notFound;
     chosenHandler(req, res);
-}).listen(8080)
+}).listen(6666,()=>{
+    console.log('running on http://localhost:6666')
+})
 
 let handlers = {};
 

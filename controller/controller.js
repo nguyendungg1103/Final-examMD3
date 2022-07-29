@@ -1,7 +1,8 @@
 const fs = require("fs");
-const models = require("../models/query");
+const models = require("../models/script.js");
 const qs = require('qs')
 const url = require("url");
+
 module.exports = {
     readFile: (path, statusCode, res) => {
         fs.readFile(path, 'utf-8', (err, data) => {
@@ -93,10 +94,47 @@ module.exports = {
             models.edit(dataEdit, id)
                 .then(result => {
                     res.writeHead(301, {
-                        Location: '/showList'
+                        Location: '/render'
                     });
                     res.end();
                 })
         })
-    }
+    },
+    delete: (req, res) => {
+        let urlPath = url.parse(req.url, true)
+        let id = (qs.parse(urlPath.query)).id;
+        models.delete(id)
+            .then(result => {
+                res.writeHead(301, {
+                    Location: '/render'
+                });
+                res.end();
+            })
+    },
+    show: (req, res) => {
+        fs.readFile('./views/show.html', 'utf-8', (err, dataShow) => {
+            let url1 = url.parse(req.url, true)
+            let id = (qs.parse(url1.query)).id;
+            let htmlShow = ''
+            models.show(id)
+                .then(result => {
+                    htmlShow += `<h3>Thành phố ${result[0].nameCity}</h3>`
+                    htmlShow += `<p>Tên: ${result[0].nameCity}</p>`
+                    htmlShow += `<p>Quốc gia: ${result[0].nameCountry}</p>`
+                    htmlShow += `<p>Diện tích: ${result[0].dientich}</p>`
+                    htmlShow += `<p>Dân số: ${result[0].danso}</p>`
+                    htmlShow += `<p>Gdp: ${result[0].gdp}</p>`
+                    htmlShow += `<p>Giới thiệu: <br> ${result[0].gioithieu} </p>`
+                    htmlShow += `<a class="btn btn-primary" href="/render">Xem danh sách</a>
+                                <a class="btn btn-success" href="/edit?id=${result[0].id}">Chỉnh sửa</a>
+                                <a class="btn btn-danger" href="/delete-city?id=${result[0].id}">Xoá</a>`
+                    dataShow = dataShow.replace('{show}', htmlShow)
+                    res.write(dataShow);
+                    res.end();
+
+                })
+
+
+        })
+    },
 }
